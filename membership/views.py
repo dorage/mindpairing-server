@@ -242,13 +242,14 @@ class UserProfile(APIView):
         }
     )
     def post(self, request):
-        user = request.user
+        user: User = request.user
+        update_flag = False
 
         try:
             # if timezone.now() - user.update_at > django.utils.timezone.timedelta(=120):
             # if timezone.now().day == 16:
             user.nickname = request.data['nickname']
-            user.update_at = timezone.now()
+            update_flag = True
             user.is_init = True
 
         except Exception as e:
@@ -256,34 +257,67 @@ class UserProfile(APIView):
 
         try:
             user.phone = request.data['phone']
-            user.update_at = timezone.now()
+            update_flag = True
         except Exception as e:
             pass
 
         try:
             user.email = request.data['email']
-            user.update_at = timezone.now()
+            update_flag = True
+        except Exception as e:
+            pass
+
+        try:
+            user.name = request.data['name']
+            update_flag = True
+        except Exception as e:
+            pass
+
+        try:
+            user.gender = request.data['gender']
+            update_flag = True
         except Exception as e:
             pass
 
         # try:
         #     user.image = request.data['image']
-        #     user.update_at = timezone.now()
+        #     update_flag = True
         # except Exception as e:
         #     pass
 
         try:
             user.mbti = request.data['mbti']
-            user.update_at = timezone.now()
+            update_flag = True
         except Exception as e:
             pass
 
         try:
-            interest_mbits = request.data['interest_mbits']
-            # interest_mbits.
-            # user.update_at = timezone.now()
+            user_interest = UserInterest.objects.get(user_id=user)
+
+            interest_mbtis_raw = request.data['interest_mbtis']
+            interest_mbtis_list = interest_mbtis_raw.split(',')
+            interest_mbtis_list = [mbti_str.upper() for mbti_str in interest_mbtis_list]
+
+            user_interest.mbtis.clear()
+            for mbti in interest_mbtis_list:
+                mbti_class = MBTIClass.objects.get(mbit=mbti)
+                user_interest.mbtis.add(mbti_class)
+
+            interests_raw = request.data['interests']
+            interests_list = interests_raw.split(',')
+
+            user_interest.interests.clear()
+            for interest in interests_list:
+                hashtag = Hashtag.objects.get_or_create(text=interest)
+                user_interest.interests.add(hashtag)
+
+            user_interest.save()
+            update_flag = True
         except Exception as e:
             pass
+
+        if update_flag:
+            user.update_at = timezone.now()
 
         user.save()
 
