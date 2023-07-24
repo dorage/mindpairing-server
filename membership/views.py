@@ -75,7 +75,9 @@ class KakaoLoginAuth(APIView):
         kakao_resource = res.json()  # {'id': <int>, 'connected_at': '2023-05-01T08:21:33Z', 'properties': {'nickname': '이강현'}, 'kakao_account': {'profile_nickname_needs_agreement': False, 'profile': {'nickname': '이강현'}}}
         print(kakao_resource)
 
-        kakao_id = kakao_resource['id']
+        kakao_id = kakao_resource.get('id', None)
+        if not kakao_id:
+            return Response({'msg': 'Invalid kakao access_token'}, status=status.HTTP_400_BAD_REQUEST)
 
         oa, oa_created = OpenAuth.objects.get_or_create(kakao=f'k{kakao_id}')
 
@@ -85,6 +87,7 @@ class KakaoLoginAuth(APIView):
 
             oa.user_id = user
             oa.kakao_update_at = timezone.now()
+            user_interest.save()
             user.save()
             oa.save()
         else:
@@ -271,6 +274,13 @@ class UserProfile(APIView):
 
         try:
             user.mbti = request.data['mbti']
+            user.update_at = timezone.now()
+        except Exception as e:
+            pass
+
+        try:
+            interest_mbits = request.data['interest_mbits']
+            interest_mbits.
             user.update_at = timezone.now()
         except Exception as e:
             pass
