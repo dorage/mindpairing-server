@@ -274,7 +274,7 @@ class UserProfile(APIView):
             pass
 
         try:
-            user.gender = request.data['gender']
+            user.gender = int(request.data['gender'])
             update_flag = True
         except Exception as e:
             pass
@@ -302,6 +302,14 @@ class UserProfile(APIView):
             for mbti in interest_mbtis_list:
                 mbti_class = MBTIClass.objects.get(mbit=mbti)
                 user_interest.mbtis.add(mbti_class)
+
+            user_interest.save()
+            update_flag = True
+        except Exception as e:
+            pass
+
+        try:
+            user_interest = UserInterest.objects.get(user_id=user)
 
             interests_raw = request.data['interests']
             interests_list = interests_raw.split(',')
