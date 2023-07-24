@@ -161,7 +161,7 @@ class MBTIResult(APIView):
         information = request.GET.get('information', None)
         decision = request.GET.get('decision', None)
         lifestyle = request.GET.get('lifestyle', None)
-        mbti = request.GET.get('mbti', 'xxxx')
+        mbti = request.GET.get('mbti', 'XXXX')
 
         try:
             mbti_class = MBTIClass.objects.get(mbti=mbti)
