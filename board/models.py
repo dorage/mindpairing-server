@@ -120,9 +120,9 @@ class Post(models.Model):
         return f"#{self.id}({self.board_id}/{self.hashtag_id})"
 
 
-class Megazine(models.Model):
-    hashtag_id = models.ForeignKey(Hashtag, on_delete=models.SET_NULL, null=True, blank=True, db_column='hashtag_id', related_name='post_set', verbose_name='subTopic')
-    user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_column='user_id', related_name='post_set', verbose_name='Author')
+class Magazine(models.Model):
+    hashtag_id = models.ForeignKey(Hashtag, on_delete=models.SET_NULL, null=True, blank=True, db_column='hashtag_id', related_name='magazine_set', verbose_name='magazine')
+    user_id = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_column='user_id', related_name='magazine_set', verbose_name='Author')
     title = models.CharField(max_length=50, null=False)
     content = models.TextField(null=False, blank=False, validators=[MinLengthValidator(5)])
     view = models.PositiveIntegerField(default=0)
