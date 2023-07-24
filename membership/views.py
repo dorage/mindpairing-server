@@ -313,7 +313,7 @@ class UserProfile(APIView):
 
             user_interest.interests.clear()
             for interest in interests_list:
-                hashtag = Hashtag.objects.get_or_create(text=interest)
+                hashtag, created = Hashtag.objects.get_or_create(text=interest)
                 user_interest.interests.add(hashtag)
 
             user_interest.save()
