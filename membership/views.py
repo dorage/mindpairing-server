@@ -195,8 +195,12 @@ class UserProfile(APIView):
         }
     )
     def get(self, request):
-        serializer = UserProfileSerializer(User.objects.get(nickname=request.user.nickname), many=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        user_id: User = request.user
+        serializer = UserProfileSerializer(User.objects.get(nickname=user_id.nickname), many=False)
+        user_interest = UserInterest.objects.get(user_id=user_id)
+        interest_mbtis = user_interest.mbtis.values_list('mbti', flat=True)
+        interests = user_interest.interests.values_list('text', flat=True)
+        return Response(data={**serializer.data, 'interest_mbtis': interest_mbtis, 'interests': interests}, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         tags=['회원 정보'],

@@ -17,3 +17,11 @@ class OpenAuthAdmin(admin.ModelAdmin):
     list_display = ['user_id', 'kakao_update_at', 'naver_update_at', 'google_update_at', 'apple_update_at']
     search_fields = ['user_id__nickname']
     ordering = ['-id']
+
+
+@admin.register(UserInterest)
+class UserInterestAdmin(admin.ModelAdmin):
+    list_display = ['user_id']
+    search_fields = ['user_id__nickname']
+
+

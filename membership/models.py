@@ -87,4 +87,4 @@ class UserInterest(models.Model):
 
     class Meta:
         db_table = 'user interest'
-        verbose_name = '유저 관심 정보'
+        verbose_name = 'User interest'

@@ -9,7 +9,8 @@ class MBTIQuestionSerializer(serializers.ModelSerializer):
 
 
 class MBTIClassSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True)
+    
     class Meta:
         model = MBTIClass
-        # fields = ('mbti', 'title', 'summary', 'content')
         fields = ('mbti', 'title', 'summary', 'description', 'love', 'advice', 'match', 'image')
