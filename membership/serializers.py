@@ -3,6 +3,8 @@ from .models import *
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    # formatted_create_at = serializers.DateTimeField()
+
     class Meta:
         model = User
         fields = ('nickname', 'name', 'gender', 'phone', 'email', 'image', 'mbti', 'create_at')

@@ -294,12 +294,10 @@ class UserProfile(APIView):
         try:
             user_interest = UserInterest.objects.get(user_id=user)
 
-            interest_mbtis_raw = request.data['interest_mbtis']
-            interest_mbtis_list = interest_mbtis_raw.split(',')
-            interest_mbtis_list = [mbti_str.upper() for mbti_str in interest_mbtis_list]
+            interest_mbtis = request.data['interest_mbtis']
 
             user_interest.mbtis.clear()
-            for mbti in interest_mbtis_list:
+            for mbti in interest_mbtis:
                 mbti_class = MBTIClass.objects.get(mbit=mbti)
                 user_interest.mbtis.add(mbti_class)
 
@@ -311,8 +309,7 @@ class UserProfile(APIView):
         try:
             user_interest = UserInterest.objects.get(user_id=user)
 
-            interests_raw = request.data['interests']
-            interests_list = interests_raw.split(',')
+            interests_list = request.data['interests']
 
             user_interest.interests.clear()
             for interest in interests_list:
