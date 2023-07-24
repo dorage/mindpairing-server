@@ -33,4 +33,4 @@ class MBTITTesthreshold(admin.ModelAdmin):
 
 @admin.register(MBTIClass)
 class MBTITTesthresholdAdmin(admin.ModelAdmin):
-    list_display = ['mbti', 'title', 'summary', 'description']
+    list_display = ['mbti', 'title', 'summary', 'match']
