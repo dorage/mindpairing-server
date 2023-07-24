@@ -1,0 +1,29 @@
+name: Deploy to AWS mindpairing-server
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+#      - name: Excute remote ssh
+#        uses: appleboy/ssh-action@v0.1.10
+#        with:
+#          host: ${{ vars.MINDPAIRING_SERVER_IP }}
+#          username: ${{ vars.MINDPAIRING_SERVER_USER }}
+#          key: ${{ secrets.SSH_PRIVATE_KEY }}
+#          script: |
+#            cd mindpairing-server
+#            git pull
+#            source venv/bin/activate
+#            pip install -r requirements.txt
+#            python manage.py makemigrations
+#            python manage.py migrate
+#            echo "yes" | python manage.py collectstatic
+#            sudo systemctl restart gunicorn

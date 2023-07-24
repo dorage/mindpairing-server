@@ -11,4 +11,5 @@ class MBTIQuestionSerializer(serializers.ModelSerializer):
 class MBTIClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = MBTIClass
+        # fields = ('mbti', 'title', 'summary', 'content')
         fields = ('mbti', 'title', 'summary', 'content')

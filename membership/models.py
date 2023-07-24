@@ -37,7 +37,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(blank=True, null=True)
     image = models.ImageField(upload_to="user_image/", blank=True, null=True)
     is_init = models.BooleanField(default=False, null=False, blank=False)
-    # set_mbti = models.BooleanField(default=False, null=False, blank=False)
     mbti = models.CharField(max_length=4, default='xxxx', validators=[RegexValidator(regex=r"[IEx][SNx][TFx][PJx]", message='Not match MBTI Characters')])
 
     create_at = models.DateTimeField(auto_now_add=True, editable=False)

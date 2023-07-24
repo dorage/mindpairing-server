@@ -4,3 +4,4 @@ logs/
 .idea/
 .DS_STORE
 config/settings/local.py
+db.sqlite3

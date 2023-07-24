@@ -81,6 +81,7 @@ class KakaoLoginAuth(APIView):
 
         if oa_created:
             user = User.objects.create_user(nickname=f'k{kakao_id}')
+            user_interest = UserInterest.objects.create(user_id=user)
 
             oa.user_id = user
             oa.kakao_update_at = timezone.now()

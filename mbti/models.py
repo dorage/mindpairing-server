@@ -68,12 +68,12 @@ MBTI_CLASS_CHOICES = (
     ('INFP', 'INFP'),
     ('INTP', 'INTP'),
 
-    ('xxxx', 'xxxx'),
+    ('XXXX', 'XXXX'),
 )
 
 
 class MBTIClass(models.Model):
-    mbti = models.CharField(max_length=4, choices=MBTI_CLASS_CHOICES, validators=[RegexValidator(regex=r"[IEx][SNx][TFx][PJx]", message='Not match MBTI Characters')])
+    mbti = models.CharField(max_length=4, choices=MBTI_CLASS_CHOICES, validators=[RegexValidator(regex=r"[IEX][SNX][TFX][PJX]", message='Not match MBTI Characters')])
     title = models.CharField(max_length=50, null=False, blank=True)
     hashtags = models.ManyToManyField(Hashtag, )
     summary = models.TextField(null=True, blank=True)
