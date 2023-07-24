@@ -280,8 +280,8 @@ class UserProfile(APIView):
 
         try:
             interest_mbits = request.data['interest_mbits']
-            interest_mbits.
-            user.update_at = timezone.now()
+            # interest_mbits.
+            # user.update_at = timezone.now()
         except Exception as e:
             pass
 
