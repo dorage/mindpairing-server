@@ -17,6 +17,51 @@ KAKAO_OAUTH_TOKEN_API = "https://kauth.kakao.com/oauth/token"
 KAKAO_OAUTH_CLIENT_ID = settings.KAKAO_OAUTH_CLIENT_ID
 KAKAO_OAUTH_REDIRECT_URI = settings.KAKAO_OAUTH_REDIRECT_URI
 
+# DORAGE; 웹/모바일 로그인 과정
+def common_sign_in_progress(kakao_access_token:str):
+    """
+    Verify kakao access token
+    """
+    me_url = "https://kapi.kakao.com/v2/user/me"
+    res = requests.get(me_url, headers={
+        "Authorization": f"Bearer {kakao_access_token}"})
+
+    if res.status_code != 200:
+        return Response({'msg': 'request body should be in \'access_token\''}, status=status.HTTP_400_BAD_REQUEST)
+
+    kakao_resource = res.json()
+    print(kakao_resource)
+
+    kakao_id = kakao_resource.get('id', None)
+    if not kakao_id:
+        return Response({'msg': 'Invalid kakao access_token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    oa, oa_created = OpenAuth.objects.get_or_create(kakao=f'k{kakao_id}')
+
+    if oa_created:
+        user = User.objects.create_user(nickname=f'k{kakao_id}')
+        user_interest = UserInterest.objects.create(user_id=user)
+
+        oa.user_id = user
+        oa.kakao_update_at = timezone.now()
+        user_interest.save()
+        user.save()
+        oa.save()
+    else:
+        user = oa.user_id
+
+    token = TokenObtainPairSerializer.get_token(user)
+    refresh_token = str(token)
+    access_token = str(token.access_token)
+
+    return {
+        "nickname": user.nickname,
+        "mbti": user.mbti,
+        "is_init": user.is_init,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+
 class KakaoLoginAuth(APIView):
     @swagger_auto_schema(
         tags=['로그인'],
@@ -62,48 +107,12 @@ class KakaoLoginAuth(APIView):
         Get access token
         """
 
-        if 'access_token' not in request.data:
+        kakao_access_token = request.data['access_token']
+        
+        if not kakao_access_token:
             return Response({'msg': 'request body NOT include \'access_token\''}, status=status.HTTP_400_BAD_REQUEST)
 
-        me_url = "https://kapi.kakao.com/v2/user/me"
-        res = requests.get(me_url, headers={
-            "Authorization": f"Bearer {request.data['access_token']}"})
-
-        if res.status_code != 200:
-            return Response({'msg': 'request body should be in \'access_token\''}, status=status.HTTP_400_BAD_REQUEST)
-
-        kakao_resource = res.json()  # {'id': <int>, 'connected_at': '2023-05-01T08:21:33Z', 'properties': {'nickname': '이강현'}, 'kakao_account': {'profile_nickname_needs_agreement': False, 'profile': {'nickname': '이강현'}}}
-        print(kakao_resource)
-
-        kakao_id = kakao_resource.get('id', None)
-        if not kakao_id:
-            return Response({'msg': 'Invalid kakao access_token'}, status=status.HTTP_400_BAD_REQUEST)
-
-        oa, oa_created = OpenAuth.objects.get_or_create(kakao=f'k{kakao_id}')
-
-        if oa_created:
-            user = User.objects.create_user(nickname=f'k{kakao_id}')
-            user_interest = UserInterest.objects.create(user_id=user)
-
-            oa.user_id = user
-            oa.kakao_update_at = timezone.now()
-            user_interest.save()
-            user.save()
-            oa.save()
-        else:
-            user = oa.user_id
-
-        token = TokenObtainPairSerializer.get_token(user)
-        refresh_token = str(token)
-        access_token = str(token.access_token)
-
-        return Response({
-            "nickname": user.nickname,
-            "mbti": user.mbti,
-            "is_init": user.is_init,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        }, status=status.HTTP_200_OK)
+        return Response(common_sign_in_progress(kakao_access_token=kakao_access_token), status=status.HTTP_200_OK)
 
 
 class KakaoLoginWeb(APIView):
@@ -130,34 +139,10 @@ class KakaoLoginWebCallback(APIView):
 
         # token_info = requests.post(KAKAO_OAUTH_TOKEN_API, data=data, headers={"Content-Type" : "application/json"}).json()
         token_info = requests.post(KAKAO_OAUTH_TOKEN_API, data=data, headers={"Content-Type" : "application/x-www-form-urlencoded"}).json()
-
-        access_token = token_info["access_token"]
-        kakao_resource = requests.get("https://kapi.kakao.com/v2/user/me", headers={
-            "Authorization": f"Bearer {access_token}"}).json()
-
-        oa, oa_created = OpenAuth.objects.get_or_create(kakao=kakao_resource['id'])
-
-        if oa_created:
-            user = User.objects.create_user(nickname=f"k{kakao_resource['id']}")
-
-            oa.user_id = user
-            oa.kakao_update_at = timezone.now()
-            user.save()
-            oa.save()
-        else:
-            user = oa.user_id
-
-        token = TokenObtainPairSerializer.get_token(user)
-        refresh_token = str(token)
-        access_token = str(token.access_token)
-
-        return Response({
-            "nickname": user.nickname,
-            "mbti": user.mbti,
-            "is_init": user.is_init,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-        }, status=status.HTTP_200_OK)
+        
+        kakao_access_token = token_info["access_token"]
+        
+        return Response(common_sign_in_progress(kakao_access_token=kakao_access_token), status=status.HTTP_200_OK)
 
 
 class UserProfile(APIView):
@@ -200,6 +185,7 @@ class UserProfile(APIView):
     def get(self, request):
         user_id: User = request.user
         serializer = UserProfileSerializer(User.objects.get(nickname=user_id.nickname), many=False)
+        print("user_id : ", user_id)
         user_interest = UserInterest.objects.get(user_id=user_id)
         interest_mbtis = user_interest.mbtis.values_list('mbti', flat=True)
         interests = user_interest.interests.values_list('text', flat=True)
